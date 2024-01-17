@@ -1,4 +1,5 @@
 import streamlit as st
+st.set_page_config(layout="wide")
 import plotly.express as px
 
 import pandas as pd
@@ -18,7 +19,7 @@ import yfinance as yf
 #Getting EUA Data
 st.text('----Getting EUA Data...')
 
-@st.cache_data()
+@st.cache_data(ttl='24h')
 def load_eua_data():
     eua=pd.read_csv('Historical data - EUA Price.csv')
 
@@ -73,8 +74,16 @@ if 'eua_dec' not in st.session_state:
     st.session_state['eua_dec']=eua_dec
 
 
-st.text('EUA Data Done!')
+st.text('EUA Data Retrieved!')
 
+
+def update_data():
+    for key in st.session_state.keys():
+        del st.session_state[key]
+    st.cache_data.clear()
+st.button('Update Data',on_click=update_data)
+st.text('Data is automatically reloaded for potential updates every 24 hours.')
+st.text('If you would like to trigger the reload right now, please click on the above "Update Data" button.')
 
 
 cutoff = pd.to_datetime('today')
