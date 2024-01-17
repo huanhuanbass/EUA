@@ -100,7 +100,7 @@ plot_axis=dict(tickfont = dict(size=15))
 st.title('EUA')
 st.text('Dry Bulk Freight (EUA) Interactive Dashboard')
 
-st.markdown('## **Candle Chart for Energy Contracts**')
+st.markdown('## **Candle Chart for Energy Products**')
 
 
 eua_f=st.session_state['eua_f']
@@ -278,7 +278,7 @@ candle.update_layout(xaxis_rangeslider_visible=False)
 st.plotly_chart(candle)
 
 
-st.markdown('## **Line Chart for Energy Contracts**')
+st.markdown('## **Line Chart for Energy Products**')
 
 rangelist00=st.selectbox('Select Range',options=['Last Year to Date','Year to Date','Month to Date','Last Week to Date','All'],key='rg00')
 sllist00=st.multiselect('Select Contracts',options=energy.columns,default=['EUA Spot','TTF','API2'],key='sl00')
