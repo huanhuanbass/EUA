@@ -297,7 +297,7 @@ else:
     rangestart00=date(2015,1,1)
 
 energy_sl=energy_sl[pd.to_datetime(energy_sl.index)>=pd.to_datetime(rangestart00)]
-lplot=px.line(energy_sl,width=1000,height=500,title='Energy Related Contracts Historical Price')
+lplot=px.line(energy_sl,width=1000,height=500,title='EUA and Related Products Historical Price')
 lplot.update_xaxes(ticks=plot_ticks, tickwidth=plot_tickwidth,  ticklen=plot_ticklen)
 lplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
 st.plotly_chart(lplot)
