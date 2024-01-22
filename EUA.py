@@ -281,7 +281,7 @@ st.plotly_chart(candle)
 st.markdown('## **Line Chart for Energy Products**')
 
 rangelist00=st.selectbox('Select Range',options=['Last Year to Date','Year to Date','Month to Date','Last Week to Date','All'],key='rg00')
-sllist00=st.multiselect('Select Products',options=energy.columns,default=['EUA Spot','TTF','API2'],key='sl00')
+sllist00=st.multiselect('Select Products',options=energy.columns,default=['TTF','API2','EUA Dec Rolling'],key='sl00')
 energy_sl=energy[sllist00]
 
 today = pd.to_datetime('today')
