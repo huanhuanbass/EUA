@@ -197,7 +197,7 @@ brent_w=brent.groupby(pd.Grouper(key='Date',freq='W')).agg({'Open':'first','High
 brent_m=brent.groupby(pd.Grouper(key='Date',freq='M')).agg({'Open':'first','High':'max','Low':'min','Close':'last'}).reset_index()
 
 
-cdtype=st.selectbox('Select Product',options=['Carbon EUA Spot','Carbon EUA Dec Rolling','Natural Gas TTF','Coal API2','Crude Oil WTI','Crude Oil Brent'],key='cdtype')
+cdtype=st.selectbox('Select Product',options=['Carbon EUA Dec Rolling','Carbon EUA Spot','Natural Gas TTF','Coal API2','Crude Oil WTI','Crude Oil Brent'],key='cdtype')
 yr1=st.number_input('Input Start Year',min_value=2005,max_value=curryear,value=curryear-1,step=1,key='yr1')
 cdfreq=st.selectbox('Select Frequency',options=['Daily','Weekly','Monthly'],key='cdfreq')
 
