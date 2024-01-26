@@ -57,6 +57,8 @@ def load_eua_data():
     fxclose.rename(columns={'Close':'FX'},inplace=True)
 
     eua_f=pd.merge(eua_f,fxclose,left_on='Date',right_on='Date',how='left')
+    eua_f.sort_values(by='Date',ascending=True,inplace=True)
+    eua_f['FX'].fillna(method='ffill',inplace=True)
     eua_f.rename(columns={'Amount':'Amount in USD'},inplace=True)
     eua_f['Amount']=eua_f['Amount in USD']/eua_f['FX']
 
@@ -307,7 +309,6 @@ st.plotly_chart(lplot)
 
 st.markdown('## **EUA Price**')
 
-eua_f.sort_values(by='Date',ascending=True,inplace=True)
 
 eua_pt1=eua_f.pivot_table(index='Date',columns='Fixed Contract',values='Amount',aggfunc='mean')
 eua_pt1.index=pd.to_datetime(eua_pt1.index,dayfirst=True)
