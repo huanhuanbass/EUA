@@ -15,6 +15,24 @@ import plotly.graph_objects as go
 
 import yfinance as yf
 
+import plotly.graph_objects as go
+
+draft_template = go.layout.Template()
+draft_template.layout.annotations = [
+    dict(
+        name="draft watermark",
+        text="COFCO Internal Use Only",
+        textangle=0,
+        opacity=0.1,
+        font=dict(color="black", size=70),
+        xref="paper",
+        yref="paper",
+        x=0.5,
+        y=0.5,
+        showarrow=False,
+    )
+]
+
 
 #Getting EUA Data
 st.text('----Getting EUA Data...')
@@ -277,6 +295,7 @@ candle.update_layout(title=str(cdtype)+' '+cdfreq+' Candle Chart',width=1000,hei
 candle.update_xaxes(ticks=plot_ticks, tickwidth=plot_tickwidth,  ticklen=plot_ticklen)
 candle.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
 candle.update_layout(xaxis_rangeslider_visible=False)
+candle.update_layout(template=draft_template)
 st.plotly_chart(candle)
 
 
@@ -302,6 +321,7 @@ energy_sl=energy_sl[pd.to_datetime(energy_sl.index)>=pd.to_datetime(rangestart00
 lplot=px.line(energy_sl,width=1000,height=500,title='EUA and Related Products Historical Price')
 lplot.update_xaxes(ticks=plot_ticks, tickwidth=plot_tickwidth,  ticklen=plot_ticklen)
 lplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
+lplot.update_layout(template=draft_template)
 st.plotly_chart(lplot)
 
 
@@ -388,6 +408,7 @@ eua_sl=eua_sl[pd.to_datetime(eua_sl.index)>=pd.to_datetime(rangestart1)]
 lplot=px.line(eua_sl,width=1000,height=500,title='EUA Spot and Fixed Forward Contract Historical Price')
 lplot.update_xaxes(ticks=plot_ticks, tickwidth=plot_tickwidth,  ticklen=plot_ticklen)
 lplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
+lplot.update_layout(template=draft_template)
 st.plotly_chart(lplot)
 
 
@@ -430,6 +451,7 @@ eua_contract=eua_contract[pd.to_datetime(eua_contract.index)>=pd.to_datetime(ran
 contractplot=px.line(eua_contract,width=1000,height=500,title='EUA '+contractlist+' Fixed Contract Bollinger Bands and Moving Average')
 contractplot.update_xaxes(ticks=plot_ticks, tickwidth=plot_tickwidth,  ticklen=plot_ticklen)
 contractplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
+contractplot.update_layout(template=draft_template)
 st.plotly_chart(contractplot)
 
 
@@ -458,6 +480,7 @@ if freq=='Weekly':
     spotplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
     spotplot['data'][-1]['line']['width']=5
     spotplot['data'][-1]['line']['color']='black'
+    spotplot.update_layout(template=draft_template)
     st.plotly_chart(spotplot)
 
 elif freq=='Monthly':
@@ -474,6 +497,7 @@ elif freq=='Monthly':
     spotplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
     spotplot['data'][-1]['line']['width']=5
     spotplot['data'][-1]['line']['color']='black'
+    spotplot.update_layout(template=draft_template)
     st.plotly_chart(spotplot)
 
 elif freq=='Quarterly':
@@ -490,6 +514,7 @@ elif freq=='Quarterly':
     spotplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
     spotplot['data'][-1]['line']['width']=5
     spotplot['data'][-1]['line']['color']='black'
+    spotplot.update_layout(template=draft_template)
     st.plotly_chart(spotplot)
 
 st.header('EUA Forward Curve')
@@ -526,6 +551,7 @@ eua_fctsl=eua_fct[sllist3]
 fctplot=px.line(eua_fctsl,width=1000,height=500,title='EUA Forward Curve')
 fctplot.update_xaxes(ticks=plot_ticks, tickwidth=plot_tickwidth,  ticklen=plot_ticklen)
 fctplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
+fctplot.update_layout(template=draft_template)
 st.plotly_chart(fctplot)
 
 st.markdown('#### **----Implied Interest Rate**')
@@ -739,6 +765,7 @@ if tsp1!=tsp2:
     tspplot=px.line(eua_tsp[['Spread']],width=1000,height=500,title='EUA Fixed Contract Time Spread: '+str(tsp1)+' minus '+str(tsp2))
     tspplot.update_xaxes(ticks=plot_ticks, tickwidth=plot_tickwidth,  ticklen=plot_ticklen)
     tspplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
+    tspplot.update_layout(template=draft_template)
     st.plotly_chart(tspplot)
 
 
