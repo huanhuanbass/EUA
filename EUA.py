@@ -39,57 +39,15 @@ st.text('----Getting EUA Data...')
 
 @st.cache_data(ttl='24h')
 def load_eua_data():
-    eua=pd.read_csv('Historical data - EUA Price.csv')
-
-    eua_s=eua[eua['Period']=='SPOT']
-    eua_f=eua[eua['Period']!='SPOT']
-
-    eua_f[['Month','Year']]=eua_f['Period'].str.split('-',expand=True)
-    eua_f['Month'].replace({'JAN':'1','FEB':'2','MAR':'3','APR':'4','MAY':'5','JUN':'6',
-                         'JUL':'7','AUG':'8','SEP':'9','OCT':'10','NOV':'11','DEC':'12'},inplace=True)
-
-    eua_f['Fixed Contract']=eua_f['Year']+'_M'+eua_f['Month']
-    eua_f['Month']=pd.to_numeric(eua_f['Month'])
-    eua_f['Year']=pd.to_numeric(eua_f['Year'])
-    eua_f['Archive Month']=pd.to_datetime(eua_f['Date']).dt.month
-    eua_f['Archive Year']=pd.to_datetime(eua_f['Date']).dt.year
-    eua_f['Rolling Month Gap']=(eua_f['Year']-eua_f['Archive Year'])*12+(eua_f['Month']-eua_f['Archive Month'])
-
-    eua_s['Date']=pd.to_datetime(eua_s['Date'])
-    eua_s['Month']=eua_s['Date'].dt.month
-    eua_s['Year']=eua_s['Date'].dt.year
-    eua_s['Fixed Contract']=eua_s['Year'].astype('str')+'_M'+eua_s['Month'].astype('str')
-    eua_s['Archive Month']=pd.to_datetime(eua_s['Date']).dt.month
-    eua_s['Archive Year']=pd.to_datetime(eua_s['Date']).dt.year
-    eua_s['Rolling Month Gap']=(eua_s['Year']-eua_s['Archive Year'])*12+(eua_s['Month']-eua_s['Archive Month'])
-    
-    eua_f['Date']=pd.to_datetime(eua_f['Date'])
-
-    eua_f=pd.concat([eua_s,eua_f])
-
-    fxyf=yf.Ticker("EURUSD=X")
-    fx=fxyf.history(period="20y")
-    fx.index=fx.index.tz_localize(None)
-    fx.reset_index(inplace=True)
-    fxclose=fx[['Date','Close']]
-    fxclose.rename(columns={'Close':'FX'},inplace=True)
-
-    eua_f=pd.merge(eua_f,fxclose,left_on='Date',right_on='Date',how='left')
-    eua_f.sort_values(by='Date',ascending=True,inplace=True)
-    eua_f['FX'].fillna(method='ffill',inplace=True)
-    eua_f.rename(columns={'Amount':'Amount in USD'},inplace=True)
-    eua_f['Amount']=eua_f['Amount in USD']/eua_f['FX']
 
     eua_dec=pd.read_csv('碳排放期货历史数据.csv')
     eua_dec.rename(columns={'日期':'Date','收盘':'Close','开盘':'Open','高':'High','低':'Low','交易量':'Volume','涨跌幅':'DoD'},inplace=True)
 
-    return eua_f, eua_dec
+    return eua_dec
 
-eua_f,eua_dec=load_eua_data()
+eua_dec=load_eua_data()
 
 
-if 'eua_f' not in st.session_state:
-    st.session_state['eua_f']=eua_f
 if 'eua_dec' not in st.session_state:
     st.session_state['eua_dec']=eua_dec
 
@@ -123,7 +81,6 @@ st.text('Dry Bulk Freight (EUA) Interactive Dashboard')
 st.markdown('## **Candle Chart for Energy Products**')
 
 
-eua_f=st.session_state['eua_f']
 eua_dec=st.session_state['eua_dec']
 eua_d=eua_dec.copy()
 
