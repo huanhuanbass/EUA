@@ -80,7 +80,7 @@ def load_eua_data():
     eua_f.rename(columns={'Amount':'Amount in USD'},inplace=True)
     eua_f['Amount']=eua_f['Amount in USD']/eua_f['FX']
 
-    eua_dec=pd.read_csv('European Union Allowance.csv')
+    eua_dec=pd.read_csv('碳排放期货历史数据.csv')
     eua_dec.rename(columns={'日期':'Date','收盘':'Close','开盘':'Open','高':'High','低':'Low','交易量':'Volume','涨跌幅':'DoD'},inplace=True)
 
     return eua_f, eua_dec
@@ -389,7 +389,7 @@ for y in range(10):
 st.header('EUA Spot and Forward Contracts Line Chart')
 st.markdown('#### **----Fixed Contracts**')
 rangelist1=st.selectbox('Select Range',options=['Last Year to Date','Year to Date','Month to Date','Last Week to Date','All'],key='rg1')
-sllist1=st.multiselect('Select Contracts',options=eua_pt1.columns,default=['Spot',m0,m1,'Dec Rolling',decy0,decy1],key='sl1')
+sllist1=st.multiselect('Select Contracts',options=eua_pt1.columns,default=['Dec Rolling'],key='sl1')
 eua_sl=eua_pt1[sllist1]
 
 today = pd.to_datetime('today')
@@ -413,51 +413,9 @@ st.plotly_chart(lplot)
 
 
 
-st.header('EUA Technical Analysis')
-st.markdown('#### **----Fixed Contracts**')
-
-rangelist0=st.selectbox('Select Range',options=['Last Year to Date','Year to Date','Month to Date','Last Week to Date','All'],key='rg0')
-if rangelist0=='Last Week to Date':
-    rangestart0=today - timedelta(days=today.weekday()) + timedelta(days=6, weeks=-2)
-elif rangelist0=='Month to Date':
-    rangestart0=date(today.year,today.month,1)
-elif rangelist0=='Year to Date':
-    rangestart0=date(today.year,1,1)
-elif rangelist0=='Last Year to Date':
-    rangestart0=date(today.year-1,1,1)
-else:
-    rangestart0=date(2015,1,1)
-
-contractlist=st.selectbox('Select Spot or Forward Contract',options=list(eua_pt1.columns))
-bb=st.number_input('Bollinger Bands Window',value=20)
-ma1=st.number_input('Short Term Moving Average Window',value=20)
-ma2=st.number_input('Long Term Moving Average Window',value=50)
-
-
-eua_contract=eua_pt1[[contractlist]]
-eua_contract.dropna(inplace=True)
-
-eua_contract.sort_index(inplace=True)
-indicator_mast = SMAIndicator(close=eua_contract[contractlist], window=ma1)
-indicator_malt = SMAIndicator(close=eua_contract[contractlist], window=ma2)
-indicator_bb = BollingerBands(close=eua_contract[contractlist], window=bb, window_dev=2)
-eua_contract['ma_st'] = indicator_mast.sma_indicator()
-eua_contract['ma_lt'] = indicator_malt.sma_indicator()
-eua_contract['bb_m'] = indicator_bb.bollinger_mavg()
-eua_contract['bb_h'] = indicator_bb.bollinger_hband()
-eua_contract['bb_l'] = indicator_bb.bollinger_lband()
-
-eua_contract=eua_contract[pd.to_datetime(eua_contract.index)>=pd.to_datetime(rangestart0)]
-contractplot=px.line(eua_contract,width=1000,height=500,title='EUA '+contractlist+' Fixed Contract Bollinger Bands and Moving Average')
-contractplot.update_xaxes(ticks=plot_ticks, tickwidth=plot_tickwidth,  ticklen=plot_ticklen)
-contractplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
-contractplot.update_layout(template=draft_template)
-st.plotly_chart(contractplot)
-
-
 
 st.header('EUA Spot and Dec Rolling Contracts Seasonality')
-contractlist_211=st.selectbox('Select Contract',options=['Spot','Dec Rolling'],key='211')
+contractlist_211=st.selectbox('Select Contract',options=['Dec Rolling','Spot'],key='211')
 freq=st.radio('Select Frequency',options=['Weekly','Monthly','Quarterly'],key='spotfreq')
 eua_sp=eua_pt2[[contractlist_211]]
 eua_sp.index=pd.to_datetime(eua_sp.index)
@@ -517,274 +475,9 @@ elif freq=='Quarterly':
     spotplot.update_layout(template=draft_template)
     st.plotly_chart(spotplot)
 
-st.header('EUA Forward Curve')
-sllist2=st.multiselect('Select Contracts',options=eua_pt1.columns,default=['Spot',m0,m1,decy0,decy1,decy2,decy3,decy4,decy5],key='2')
-eua_fc=eua_pt1[sllist2]
-eua_fct=eua_fc.transpose()
-
-
-tday=tooday.date()
-lday=tday-BDay(1)
-l2day=tday-BDay(2)
-l3day=tday-BDay(3)
-l4day=tday-BDay(4)
-lweek=tday-BDay(5)
-l2week=tday-BDay(10)
-l3week=tday-BDay(15)
-lmonth=tday-BDay(20)
-l2month=tday-BDay(45)
-
-
-lday=lday.date()
-l2day=l2day.date()
-l3day=l3day.date()
-l4day=l4day.date()
-lweek=lweek.date()
-l2week=l2week.date()
-l3week=l3week.date()
-lmonth=lmonth.date()
-l2month=l2month.date()
-
-
-sllist3=st.multiselect('Select Dates',options=eua_fct.columns.date,default=[tday,lday,l2day,lweek,l2week,lmonth,l2month],key='3')
-eua_fctsl=eua_fct[sllist3]
-fctplot=px.line(eua_fctsl,width=1000,height=500,title='EUA Forward Curve')
-fctplot.update_xaxes(ticks=plot_ticks, tickwidth=plot_tickwidth,  ticklen=plot_ticklen)
-fctplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
-fctplot.update_layout(template=draft_template)
-st.plotly_chart(fctplot)
-
-st.markdown('#### **----Implied Interest Rate**')
-
-eua_pt1t=eua_pt1.transpose()
-
-eua_tday=eua_fct[[tday]]
-eua_tooday=eua_pt1t[[tday]]
-
-
-ir1=st.selectbox('Select Contract 1',options=[m0]+list(eua_pt1.columns),key='ir1')
-eua_ir1=eua_tooday.loc[ir1,:]
-eua_ir1=eua_ir1.iloc[0]
-ir1v=st.number_input('Input Price for Contract 1',value=eua_ir1)
-
-ir2list=[decy0]+list(eua_pt1.columns)
-ir2list.remove('Spot')
-ir2=st.selectbox('Select Contract 2 (exclude SPOT)',options=ir2list,key='ir2')
-
-eua_ir2=eua_tooday.loc[ir2,:]
-eua_ir2=eua_ir2.iloc[0]
-ir2v=st.number_input('Input Price for Contract 2',value=eua_ir2)
-
-mg=st.number_input('Input Margin Estimation for Future Contracts',value=0.1)
-
-if ir1=='Spot':
-    yr_ir1,m_ir1=m0.split('_M')
-    dgap=30-tday.day
-
-else:
-    yr_ir1,m_ir1=ir1.split('_M')
-    dgap=0
-
-
-yr_ir2,m_ir2=ir2.split('_M')
-
-yr_ir0,m_ir0=m0.split('_M')
-
-yr_ir1=int(yr_ir1)
-m_ir1=int(m_ir1)
-yr_ir2=int(yr_ir2)
-m_ir2=int(m_ir2)
-mgap=(yr_ir2-yr_ir1)*12+(m_ir2-m_ir1)+dgap/30
-
-yr_ir0=int(yr_ir0)
-m_ir0=int(m_ir0)
-
-t1=(yr_ir1-yr_ir0)+(m_ir1-m_ir0)/12+(30-tday.day)/360
-t2=(yr_ir2-yr_ir1)+(m_ir2-m_ir1)/12
-
-
-if ir1=='Spot':
-    rir=((ir2v-ir2v*mg)-(ir1v-ir2v*mg))/(ir1v-ir2v*mg)
-    yrir=(1+rir)**(12/mgap)-1
-else:
-    yrir=(ir2v-ir1v)/(ir1v*(1-mg)*t2-(ir2v-ir1v)*mg*(t1+t2))
-
-
-yrir="{:.2%}".format(yrir)
-
-
-st.markdown('##### :blue[Implied Interest Rate Between] '+str(ir1)+' :blue[and] '+str(ir2)+' :blue[:] '+str(yrir))
-
-st.header('EUA Interest Rate Arbitrage')
-ourir=st.number_input('Input Our Financing Cost',value=0.06)
-ourmg=st.number_input('Input Margin Estimation for Future Contracts',value=0.1,key='mg2')
-
-st.markdown('#### **----From Spot to Future**')
-eua_sp=eua_tday.loc['Spot',:]
-eua_sp=eua_sp.iloc[0]
-ourspot=st.number_input('Input Our Spot Price',value=eua_sp)
-sp_dgap=30-tday.day
-ourir_sp_fm=(1+ourir)**(sp_dgap/360)-1
-eua_sp_fm=(ourspot*(1+ourir_sp_fm)/(1+ourmg*ourir_sp_fm))
-
-yr_fm,m_fm=m0.split('_M')
-yr_fd,m_fd=decy0.split('_M')
-sp_mgap=(int(yr_fd)-int(yr_fm))*12+(int(m_fd)-int(m_fm))+sp_dgap/30
-ourir_sp_fd=(1+ourir)**(sp_mgap/12)-1
-eua_sp_fd=(ourspot*(1+ourir_sp_fd)/(1+ourmg*ourir_sp_fd))
-
-gap_spm1=(sp_dgap)/30+1
-ir_spm1=(1+ourir)**(gap_spm1/12)-1
-eua_sp_m1=(ourspot*(1+ir_spm1)/(1+ourmg*ir_spm1))
-
-gap_sp1=sp_mgap+12*1
-ir_sp1=(1+ourir)**(gap_sp1/12)-1
-eua_sp_d1=(ourspot*(1+ir_sp1)/(1+ourmg*ir_sp1))
-
-gap_sp2=sp_mgap+12*2
-ir_sp2=(1+ourir)**(gap_sp2/12)-1
-eua_sp_d2=(ourspot*(1+ir_sp2)/(1+ourmg*ir_sp2))
-
-gap_sp3=sp_mgap+12*3
-ir_sp3=(1+ourir)**(gap_sp3/12)-1
-eua_sp_d3=(ourspot*(1+ir_sp3)/(1+ourmg*ir_sp3))
-
-gap_sp4=sp_mgap+12*4
-ir_sp4=(1+ourir)**(gap_sp4/12)-1
-eua_sp_d4=(ourspot*(1+ir_sp4)/(1+ourmg*ir_sp4))
-
-gap_sp5=sp_mgap+12*5
-ir_sp5=(1+ourir)**(gap_sp5/12)-1
-eua_sp_d5=(ourspot*(1+ir_sp5)/(1+ourmg*ir_sp5))
-
-d1={'Implied Curve':pd.Series([ourspot,eua_sp_fm,eua_sp_m1,eua_sp_fd,eua_sp_d1,eua_sp_d2,eua_sp_d3,eua_sp_d4,eua_sp_d5],index=['Spot',m0,m1,decy0,decy1,decy2,decy3,decy4,decy5])}
-df1=pd.DataFrame(d1)
-
-st.write(df1.transpose())
-
-
-st.markdown('#### **----From Front Month to Spot and Future**')
-eua_fm=eua_tday.loc[m0,:]
-eua_fm=eua_fm.iloc[0]
-ourfm=st.number_input('Input Our Front Month Price',value=eua_fm)
-
-fm_dgap=30-tday.day
-ourir_fm_sp=(1+ourir)**(fm_dgap/360)-1
-eua_fm_sp=ourfm*(1+ourmg*ourir_fm_sp)/(1+ourir_fm_sp)
-
-yr_fm,m_fm=m0.split('_M')
-yr_fd,m_fd=decy0.split('_M')
-fm_mgap=(int(yr_fd)-int(yr_fm))*12+(int(m_fd)-int(m_fm))+fm_dgap/30
-
-ourir_fm_fd=(1+ourir)**(fm_mgap/12)-1
-eua_fm_fd=(eua_fm_sp*(1+ourir_fm_fd)/(1+ourmg*ourir_fm_fd))
-
-gap_fmm1=(fm_dgap)/30+1
-ir_fmm1=(1+ourir)**(gap_fmm1/12)-1
-eua_fm_m1=(eua_fm_sp*(1+ir_fmm1)/(1+ourmg*ir_fmm1))
-
-gap_fm1=fm_mgap+12*1
-ir_fm1=(1+ourir)**(gap_fm1/12)-1
-eua_fm_d1=(eua_fm_sp*(1+ir_fm1)/(1+ourmg*ir_fm1))
-
-gap_fm2=fm_mgap+12*2
-ir_fm2=(1+ourir)**(gap_fm2/12)-1
-eua_fm_d2=(eua_fm_sp*(1+ir_fm2)/(1+ourmg*ir_fm2))
-
-gap_fm3=fm_mgap+12*3
-ir_fm3=(1+ourir)**(gap_fm3/12)-1
-eua_fm_d3=(eua_fm_sp*(1+ir_fm3)/(1+ourmg*ir_fm3))
-
-gap_fm4=fm_mgap+12*4
-ir_fm4=(1+ourir)**(gap_fm4/12)-1
-eua_fm_d4=(eua_fm_sp*(1+ir_fm4)/(1+ourmg*ir_fm4))
-
-gap_fm5=fm_mgap+12*5
-ir_fm5=(1+ourir)**(gap_fm5/12)-1
-eua_fm_d5=(eua_fm_sp*(1+ir_fm5)/(1+ourmg*ir_fm5))
-
-
-d2={'Implied Curve':pd.Series([eua_fm_sp,ourfm,eua_fm_m1,eua_fm_fd,eua_fm_d1,eua_fm_d2,eua_fm_d3,eua_fm_d4,eua_fm_d5],index=['Spot',m0,m1,decy0,decy1,decy2,decy3,decy4,decy5])}
-df2=pd.DataFrame(d2)
-st.write(df2.transpose())
-
-st.markdown('#### **----From Front Dec to Spot and Future**')
-eua_fd=eua_tday.loc[decy0,:]
-eua_fd=eua_fd.iloc[0]
-ourfd=st.number_input('Input Our Front Dec Price',value=eua_fd)
-
-fd_dgap=30-tday.day
-yr_fm,m_fm=m0.split('_M')
-yr_fd,m_fd=decy0.split('_M')
-fd_mgap=(int(yr_fd)-int(yr_fm))*12+(int(m_fd)-int(m_fm))+fd_dgap/30
-
-ourir_fd_sp=(1+ourir)**(fd_mgap/12)-1
-eua_fd_sp=ourfd*(1+ourmg*ourir_fd_sp)/(1+ourir_fd_sp)
-
-ourir_fd_fm=(1+ourir)**(fd_dgap/360)-1
-eua_fd_fm=(eua_fd_sp*(1+ourir_fd_fm)/(1+ourmg*ourir_fd_fm))
-
-gap_fdm1=(fd_dgap)/30+1
-ir_fdm1=(1+ourir)**(gap_fdm1/12)-1
-eua_fd_m1=(eua_fd_sp*(1+ir_fdm1)/(1+ourmg*ir_fdm1))
-
-gap_fd1=fd_mgap+12*1
-ir_fd1=(1+ourir)**(gap_fd1/12)-1
-eua_fd_d1=(eua_fd_sp*(1+ir_fd1)/(1+ourmg*ir_fd1))
-
-gap_fd2=fd_mgap+12*2
-ir_fd2=(1+ourir)**(gap_fd2/12)-1
-eua_fd_d2=(eua_fd_sp*(1+ir_fd2)/(1+ourmg*ir_fd2))
-
-gap_fd3=fd_mgap+12*3
-ir_fd3=(1+ourir)**(gap_fd3/12)-1
-eua_fd_d3=(eua_fd_sp*(1+ir_fd3)/(1+ourmg*ir_fd3))
-
-gap_fd4=fd_mgap+12*4
-ir_fd4=(1+ourir)**(gap_fd4/12)-1
-eua_fd_d4=(eua_fd_sp*(1+ir_fd4)/(1+ourmg*ir_fd4))
-
-gap_fd5=fd_mgap+12*5
-ir_fd5=(1+ourir)**(gap_fd5/12)-1
-eua_fd_d5=(eua_fd_sp*(1+ir_fd5)/(1+ourmg*ir_fd5))
-
-d3={'Implied Curve':pd.Series([eua_fd_sp,eua_fd_fm,eua_fd_m1,ourfd,eua_fd_d1,eua_fd_d2,eua_fd_d3,eua_fd_d4,eua_fd_d5],index=['Spot',m0,m1,decy0,decy1,decy2,decy3,decy4,decy5])}
-df3=pd.DataFrame(d3)
-st.write(df3.transpose())
-
-
-st.header('EUA Time Spread')
-st.markdown('#### **----Fixed Contracts**')
-tsp1=st.selectbox('Select Contract 1',options=[m0]+list(eua_pt1.columns))
-tsp2=st.selectbox('Select Contract 2',options=[decy0]+list(eua_pt1.columns))
-
-if tsp1!=tsp2:
-    eua_tsp=eua_pt1[[tsp1,tsp2]]
-    eua_tsp.dropna(inplace=True)
-    eua_tsp['Spread']=eua_tsp[tsp1]-eua_tsp[tsp2]
-    tspplot=px.line(eua_tsp[['Spread']],width=1000,height=500,title='EUA Fixed Contract Time Spread: '+str(tsp1)+' minus '+str(tsp2))
-    tspplot.update_xaxes(ticks=plot_ticks, tickwidth=plot_tickwidth,  ticklen=plot_ticklen)
-    tspplot.update_layout(title_font_color=plot_title_font_color,title_font_size=plot_title_font_size,legend_font_size=plot_legend_font_size,xaxis=plot_axis,yaxis=plot_axis)
-    tspplot.update_layout(template=draft_template)
-    st.plotly_chart(tspplot)
-
-
-
-
-
-lday=tooday-BDay(1)
-l2day=tooday-BDay(2)
-l3day=tooday-BDay(3)
-l4day=tooday-BDay(4)
-lweek=tooday-BDay(5)
-l2week=tooday-BDay(10)
-l3week=tooday-BDay(15)
-lmonth=tooday-BDay(20)
-l2month=tooday-BDay(45)
-
 
 st.header('EUA Summary')
-eua_df=eua_pt1[['Spot',m0,m1,'Dec Rolling',decy0,decy1,decy2,decy3,decy4,decy5]]
+eua_df=eua_pt1[['Spot','Dec Rolling']]
 
 eua_df.index=eua_df.index.date
 
